@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # queue_system
 
 A new Flutter project.
