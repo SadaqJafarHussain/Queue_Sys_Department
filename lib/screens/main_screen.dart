@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:queue_system/screens/all_branches.dart';
+import 'package:provider/provider.dart';
+import 'package:queue_system/screens/all_employees.dart';
 import 'package:queue_system/screens/main_board.dart';
 import 'package:queue_system/screens/new_branch_account.dart';
+import '../Controller/app_provider.dart';
+import 'login_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   int screenIndex = 0;
   List<Widget> screens = [
     const MainBoardScreen(),
-    const AllBranches(),
+    const AllEmployees(),
     const NewBranchAccount(),
     Container(),
     Container(),
@@ -43,9 +46,9 @@ class _MainScreenState extends State<MainScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
-                  "asset/images/place.png",
-                  height: 100,
-                  color: const Color(0xffFFFFFF),
+                  'asset/images/logo.png', // Path to your SVG file
+                  height: 100.0,
+                  width: 100.0,
                 ),
                 const SizedBox(
                   height: 20,
@@ -55,6 +58,7 @@ class _MainScreenState extends State<MainScreen> {
                     setState(() {
                       index = 0;
                       screenIndex = 0;
+                      subIndex=0;
                     });
                   },
                   child: Container(
@@ -94,7 +98,7 @@ class _MainScreenState extends State<MainScreen> {
                                         ? const Color(0xffFFB729)
                                         : const Color(0xff9BA5BE),
                                     fontFamily: 'Cairo',
-                                    fontSize: 15,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
@@ -150,14 +154,14 @@ class _MainScreenState extends State<MainScreen> {
                             children: [
                               Flexible(
                                 child: Text(
-                                  "حسابات الافرع",
+                                  "حسابات الموظفين",
                                   style: TextStyle(
                                     overflow: TextOverflow.visible,
                                     color: index == 1
                                         ? const Color(0xffFFB729)
                                         : const Color(0xff9BA5BE),
                                     fontFamily: 'Cairo',
-                                    fontSize: 15,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
@@ -195,7 +199,7 @@ class _MainScreenState extends State<MainScreen> {
                                     });
                                   },
                                   child: Text(
-                                    "كل الافرع",
+                                    "كل الموظفين",
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontFamily: 'Cairo',
@@ -213,47 +217,11 @@ class _MainScreenState extends State<MainScreen> {
                                     });
                                   },
                                   child: Text(
-                                    "اضافة حساب فرع",
+                                    "اضافة حساب موظف",
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontFamily: 'Cairo',
                                       color: subIndex == 2
-                                          ? const Color(0xffFFB729)
-                                          : const Color(0xff9BA5BE),
-                                    ),
-                                  ),
-                                ),
-                                MaterialButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      subIndex = 3;
-                                      screenIndex = 3;
-                                    });
-                                  },
-                                  child: Text(
-                                    "موضفي الفرع",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontFamily: 'Cairo',
-                                      color: subIndex == 3
-                                          ? const Color(0xffFFB729)
-                                          : const Color(0xff9BA5BE),
-                                    ),
-                                  ),
-                                ),
-                                MaterialButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      subIndex = 4;
-                                      screenIndex = 4;
-                                    });
-                                  },
-                                  child: Text(
-                                    "اعدادات الفرع",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontFamily: 'Cairo',
-                                      color: subIndex == 4
                                           ? const Color(0xffFFB729)
                                           : const Color(0xff9BA5BE),
                                     ),
@@ -274,20 +242,6 @@ class _MainScreenState extends State<MainScreen> {
                                   width: 2,
                                   height: 25,
                                   color: subIndex == 2
-                                      ? const Color(0xffFFB729)
-                                      : const Color(0xff9BA5BE),
-                                ),
-                                Container(
-                                  width: 2,
-                                  height: 25,
-                                  color: subIndex == 3
-                                      ? const Color(0xffFFB729)
-                                      : const Color(0xff9BA5BE),
-                                ),
-                                Container(
-                                  width: 2,
-                                  height: 25,
-                                  color: subIndex == 4
                                       ? const Color(0xffFFB729)
                                       : const Color(0xff9BA5BE),
                                 ),
@@ -337,7 +291,7 @@ class _MainScreenState extends State<MainScreen> {
                                         ? const Color(0xffFFB729)
                                         : const Color(0xff9BA5BE),
                                     fontFamily: 'Cairo',
-                                    fontSize: 15,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
@@ -358,6 +312,88 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                 ),
+               index==2? Column(
+                 children: [
+                   Padding(
+                     padding: const EdgeInsets.only(right: 18.0),
+                     child: MaterialButton(
+                       onPressed: () {
+
+                       },
+                       child: Container(
+                         padding: const EdgeInsets.all(8),
+                         decoration: BoxDecoration(
+                             color: Colors.transparent,
+                             borderRadius: BorderRadius.circular(8)),
+                         child: Row(
+                           mainAxisAlignment: MainAxisAlignment.end,
+                           children: [
+                             const  Text(
+                               "تصفير النظام",
+                               style: TextStyle(
+                                 overflow: TextOverflow.visible,
+                                 color: const Color(0xff9BA5BE),
+                                 fontFamily: 'Cairo',
+                                 fontSize: 13,
+                               ),
+                             ),
+                             const SizedBox(
+                               width: 10,
+                             ),
+                             Image.asset(
+                               "asset/images/no.png",
+                               height: 16,
+                             )
+                           ],
+                         ),
+                       ),
+                     ),
+                   ),
+                   Padding(
+                      padding: const EdgeInsets.only(right: 18.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          Provider.of<AppProvider>(context, listen: false)
+                              .signUp(context)
+                              .then((onValue) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                  (route) => false,
+                            );
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(8)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const  Text(
+                                "تسجيل خروج",
+                                style: TextStyle(
+                                  overflow: TextOverflow.visible,
+                                  color: const Color(0xff9BA5BE),
+                                  fontFamily: 'Cairo',
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Image.asset(
+                                "asset/images/delete.png",
+                                height: 16,
+                                color: Colors.red,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                 ],
+               ):Container(),
               ],
             ),
           ),

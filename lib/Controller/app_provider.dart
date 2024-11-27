@@ -2,19 +2,19 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:queue_system/Model/admin_model.dart';
-import 'package:queue_system/Model/department_model.dart';
+import 'package:queue_system/Model/user_model.dart';
+import 'package:queue_system/Model/employee_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 
+String baseUrl="http://192.168.10.16:80/";
+
 class AppProvider with ChangeNotifier {
-  AdminModel? admin;
+  UserModel? userModel;
   bool  loading=false;
-  List<DepartmentModel> _departments=[];
-  List<DepartmentModel> get departments=> _departments;
 
 
   Future<File> getImageFileFromAssets(String path) async {
@@ -27,44 +27,50 @@ class AppProvider with ChangeNotifier {
     return file;
   }
 
+  Future<void> getUser() async {
+    var pref = await SharedPreferences.getInstance();
+    String? userJson = pref.getString('user');  // Get user data from SharedPreferences
+    if (userJson == null) {
+      userModel = null;  // If no user data found, set userModel to null
+      notifyListeners();
+    } else {
+      var data = jsonDecode(userJson);
+      // Ensure proper token and data parsing
+      userModel = UserModel.fromJson(data['info']['data'], token: data['token']);
+      notifyListeners();  // Update the state after user data is fetched
+    }
+  }
   Future<String> logIn(String email, String password) async {
+    var pref = await SharedPreferences.getInstance();
     try {
       final response = await http.get(Uri.parse(
-          "https://queue.nustsys.info/apis/firm/login?email=$email&&password=$password"));
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        //print(data);
-        admin = AdminModel.fromJson(data["info"]["data"], data["token"]);
-        final ref=await SharedPreferences.getInstance();
-        ref.setString("token", data["token"].toString());
-        notifyListeners();
+          "${baseUrl}queue/apis/department/login.php?email=$email&&password=$password"));
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print(response.body);
+        // Save the response (user data) to SharedPreferences
+        pref.setString("user", response.body);
+        // Now fetch user data from SharedPreferences and notify listeners
+        await getUser(); // Ensure user data is loaded after login
         return "تم تسجيل الدخول بنجاح";
       } else if (response.statusCode == 400) {
-        // Handle other status codes
-        print('Failed to load data. Status code: ${response.statusCode}');
         return jsonDecode(response.body)["message"].toString();
       } else {
         return "حدث خطأ ما";
       }
     } catch (e) {
-      // Handle errors like network failure
-      print('Error: $e');
-      return "البريد الالكتروني او كلمة السر غير صحيحة";
+      return "$e";
     }
   }
 
-  Future<String> addDepartment(String departmentName, String email, String phone,
+  Future<String> addEmployee(String counterName, String email, String phone,
       File? image, String employeeName, String password) async {
-    var uri = Uri.parse('https://queue.nustsys.info/apis/firm/add_deprtment');
+    var uri = Uri.parse('http://192.168.10.16:80/queue/apis/department/add_employee.php');
     var request = http.MultipartRequest('POST', uri);
 
-    var ref=await SharedPreferences.getInstance();
-    var token=ref.getString("token");
-    request.headers['Authorization'] = 'Bearer $token';
-
+    request.headers['Authorization'] = 'Bearer ${userModel!.token}';
     // Add additional fields
-    request.fields['firm_id'] = admin!.userId.toString();
-    request.fields['depart_name'] = departmentName;
+    request.fields['depart_id'] = userModel!.departmentID.toString();
+    request.fields['c_name'] = counterName;
     request.fields['email'] = email;
     request.fields['phone'] = phone;
     request.fields['employe_name'] = employeeName;
@@ -104,23 +110,21 @@ class AppProvider with ChangeNotifier {
     }
   }
 
-  Future<String> updateDepartment(String? departmentName, String? email, String? phone,
-      File? image, String? employeeName, String? password,DepartmentModel department) async {
-    var ref=await SharedPreferences.getInstance();
-    var token=ref.getString("token");
-  var uri = Uri.parse('https://queue.nustsys.info/apis/firm/edit_department');
+  Future<String> updateEmployee(String? counterName, String? email, String? phone,
+      File? image, String? employeeName, String? password,EmployeeModel employee) async {
+    String url = 'http://192.168.10.16:80/queue/apis/department/edit_employee.php';
+    print('URL: $url');
+    var uri = Uri.parse(url);
   var request = http.MultipartRequest('POST', uri);
 
-
-  request.headers['Authorization'] = 'Bearer $token';
-
+  request.headers['Authorization'] = 'Bearer ${userModel!.token}';
   // Add additional fields
-  request.fields['department_id']=department.departmentId.toString();
-  request.fields['firm_id'] = admin!.userId.toString();
-  request.fields['depart_name'] = departmentName??department.departmentName;
-  request.fields['email'] = email??department.email;
-  request.fields['phone'] = phone??department.phoneNumber;
-  request.fields['employe_name'] = employeeName??department.employeeName;
+  request.fields['employe_id'] = employee.employeeID.toString();
+  request.fields['depart_id']=userModel!.departmentID.toString();
+  request.fields['c_name'] = counterName??employee.counterName;
+  request.fields['email'] = email??employee.email;
+  request.fields['phone'] = phone??employee.phoneNumber;
+  request.fields['employe_name'] = employeeName??employee.employeeName;
   if(password==null){
     null;
   }else{
@@ -133,22 +137,13 @@ class AppProvider with ChangeNotifier {
         image.path,
         filename: "logo.png",
       ));
-    }else {
-      // Step 1: Download the image from URL
-      var response = await http.get(Uri.parse(department.imageUrl));
-
-      // Step 2: Get the temporary directory to save the file
-      Directory tempDir = await getTemporaryDirectory();
-      String tempPath = tempDir.path;
-
-      // Step 3: Create a file from the downloaded image
-      File imageFile = File('$tempPath/${path.basename(department.imageUrl)}');
-      await imageFile.writeAsBytes(response.bodyBytes);
-    // Step 4: Add the image to the multipart request
-    request.files.add(await http.MultipartFile.fromPath(
-    'image',
-    imageFile.path,
-    filename: path.basename(imageFile.path), // Optional, provides the filename
+    } else {
+    // Load and upload the asset image
+    Uint8List imageBytes = await loadAssetImage();
+    request.files.add(http.MultipartFile.fromBytes(
+    'image',  // Field name for file
+    imageBytes,
+    filename: 'default_image.png',
     ));
     }
   // Send request
@@ -165,19 +160,14 @@ class AppProvider with ChangeNotifier {
     loading=false;
     notifyListeners();
     return 'File upload failed with status: ${response.statusCode}}';
+   }
   }
 
-  }
-
-  Future<String> deleteDepartment(String departmentId)async{
-    _departments.removeWhere((dep)=>dep.departmentId.toString()==departmentId);
-     notifyListeners();
-    var ref=await SharedPreferences.getInstance();
-    var token= ref.getString("token");
-    var response=await http.post(Uri.parse("https://queue.nustsys.info/apis/firm/delete_depart"),headers:{
-      'Authorization': 'Bearer $token',
+  Future<String> deleteEmployee(String employeeID)async{
+    var response=await http.post(Uri.parse("${baseUrl}queue/apis/department/delete_employee.php"),headers:{
+      'Authorization': 'Bearer ${userModel!.token}',
     },body: {
-      "department_id": departmentId,
+      "employee_id": employeeID,
     });
     if(response.statusCode==200){
       print(response.body);
@@ -194,43 +184,56 @@ class AppProvider with ChangeNotifier {
     });
   }
 
-  Future<void> getDepartments() async {
-    var ref=await SharedPreferences.getInstance();
-    var token=ref.getString("token");
+  Future<List<EmployeeModel>> getEmployees() async {
     var headers = {
-      'Authorization': 'Bearer $token',
+      'Authorization': 'Bearer ${userModel!.token}',
     };
     try {
       final response = await http.get(Uri.parse(
-          "https://queue.nustsys.info/apis/firm/all_department"),headers: headers);
+          "${baseUrl}queue/apis/department/all_employee.php"),headers: headers);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         print(data["message"]);
         if(data["message"]=="no data !"){
-          _departments=[];
+
+          return [];
         }
        else{
-          _departments = data["message"].map<DepartmentModel>((item) {
-            return DepartmentModel.fromJson(item as Map<String, dynamic>);
+        return data["message"].map<EmployeeModel>((item) {
+            return EmployeeModel.fromJson(item as Map<String, dynamic>);
           }).toList();
         }
-        notifyListeners();
+       notifyListeners();
       } else if (response.statusCode == 400) {
         // Handle other status codes
         print('Failed to load data. Status code: ${response.statusCode}');
+
+        return [];
       } else {
         print(response.body);
+
+        return [];
       }
     } catch (e) {
       // Handle errors like network failure
       print('Error: $e');
+
+      return [];
     }
   }
 
- /* Future<void> clearLoginTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('login_time');
+  Stream<List<EmployeeModel>> employeesStream() async* {
+    while (true) {
+      await Future.delayed(const Duration(seconds: 1));
+      var someTable =await getEmployees();
+      yield someTable;
+    }
   }
 
-  */
+  Future<void> signUp(BuildContext context) async {
+    var pref = await SharedPreferences.getInstance();
+    await pref.remove("user"); // Remove user data from SharedPreferences
+    userModel = null;
+    notifyListeners();
+  }
 }

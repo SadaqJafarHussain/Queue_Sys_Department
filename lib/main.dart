@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:queue_system/Controller/app_provider.dart';
 import 'package:queue_system/screens/login_screen.dart';
+import 'package:queue_system/screens/start_up_screen.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +21,7 @@ void main() async{
     // Set the window size to the screen size and disable resizing
     WindowOptions windowOptions = WindowOptions(
       size: const Size(1300,800),               //////// Set window size to full screen size
-      minimumSize: const Size(1300,800),         /////// Prevent resizing
+      minimumSize: const Size(1300,800),        /////// Prevent resizing
       maximumSize: screenSize,         // Prevent resizing
       center: true,
       // Center the window
@@ -53,9 +54,7 @@ class MyApp extends StatelessWidget {
                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
            useMaterial3: true,
       ),
-      home:const Directionality(
-          textDirection:TextDirection.rtl,
-          child: LoginScreen()),
+      home:const StartUpScreen(),
     );
   }
 }

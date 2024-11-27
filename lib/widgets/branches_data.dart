@@ -4,15 +4,15 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:queue_system/Model/department_model.dart';
+import 'package:queue_system/Model/employee_model.dart';
 
 import '../Controller/app_provider.dart';
 
 class BranchesData extends StatefulWidget {
-  final DepartmentModel department;
+  final EmployeeModel employee;
   const BranchesData(
       {
-      required this.department,
+      required this.employee,
       super.key});
 
   @override
@@ -24,11 +24,11 @@ class _BranchesDataState extends State<BranchesData> {
 
   TextEditingController password = TextEditingController();
 
-  TextEditingController branch = TextEditingController();
+  TextEditingController counterName = TextEditingController();
 
   TextEditingController phone = TextEditingController();
 
-  TextEditingController manager = TextEditingController();
+  TextEditingController employee = TextEditingController();
 
   File? _selectedImage;
 
@@ -99,7 +99,7 @@ class _BranchesDataState extends State<BranchesData> {
                                  const Color(0xff00CEC9),
                                   'هل انت متاكد من حذف هذا الحساب ؟',
                                     () {
-                                  Provider.of<AppProvider>(context,listen: false).deleteDepartment(widget.department.departmentId.toString());
+                                  Provider.of<AppProvider>(context,listen: false).deleteEmployee(widget.employee.employeeID.toString());
                                   setState(() {
                                   });
                                 },);
@@ -138,7 +138,7 @@ class _BranchesDataState extends State<BranchesData> {
                           height: 30,
                           child: ElevatedButton(
                             onPressed:() {
-                              showEditDialog(context,widget.department);
+                              showEditDialog(context,widget.employee);
                             },
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -181,7 +181,7 @@ class _BranchesDataState extends State<BranchesData> {
                   width: MediaQuery.of(context).size.width * .08,
                   child: Center(
                     child: Text(
-                      widget.department.phoneNumber,
+                      widget.employee.counterName,
                       style: const TextStyle(
                         color: Color(0xffFFFFFF),
                         fontFamily: 'Cairo',
@@ -198,7 +198,7 @@ class _BranchesDataState extends State<BranchesData> {
                   width: MediaQuery.of(context).size.width * .14,
                   child: Center(
                     child: Text(
-                      widget.department.email,
+                      widget.employee.email,
                       style: const TextStyle(
                         color: Color(0xffFFFFFF),
                         fontFamily: 'Cairo',
@@ -215,7 +215,7 @@ class _BranchesDataState extends State<BranchesData> {
                   width: MediaQuery.of(context).size.width * .13,
                   child: Center(
                     child: Text(
-                      widget.department.employeeName,
+                      widget.employee.employeeName,
                       style:const  TextStyle(
                         color: Color(0xffFFFFFF),
                         fontFamily: 'Cairo',
@@ -232,7 +232,7 @@ class _BranchesDataState extends State<BranchesData> {
                   width: MediaQuery.of(context).size.width * .12,
                   child: Center(
                     child: Text(
-                      widget.department.departmentName,
+                      widget.employee.counterName,
                       style: const TextStyle(
                         color: Color(0xffFFFFFF),
                         fontFamily: 'Cairo',
@@ -250,7 +250,7 @@ class _BranchesDataState extends State<BranchesData> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: NetworkImage(widget.department.imageUrl),
+                      image: widget.employee.imageUrl=="no"?const AssetImage("asset/images/default.png"): NetworkImage(widget.employee.imageUrl),
                       fit: BoxFit.contain,
                     )
                   ),
@@ -316,12 +316,12 @@ class _BranchesDataState extends State<BranchesData> {
     );
   }
 
-  void showEditDialog(BuildContext context,DepartmentModel department) {
+  void showEditDialog(BuildContext context,EmployeeModel department) {
     setState(() {
       email.text=department.email;
       phone.text=department.phoneNumber;
-      manager.text=department.employeeName;
-      branch.text=department.departmentName;
+      employee.text=department.employeeName;
+      counterName.text=department.counterName;
     });
     showDialog(
       context: context,
@@ -501,9 +501,9 @@ class _BranchesDataState extends State<BranchesData> {
                                 autocorrect: false,
                                 autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
-                                controller: branch,
+                                controller: counterName,
                                 decoration: InputDecoration(
-                                    hintText: "اسم الفرع",
+                                    hintText: "اسم الشباك",
                                     hintStyle: const TextStyle(
                                         fontFamily: 'Cairo',
                                         color: Color(0xff9BA5BE),
@@ -558,7 +558,7 @@ class _BranchesDataState extends State<BranchesData> {
                                       image: FileImage(_selectedImage!),
                                       fit: BoxFit.fill,
                                     ):DecorationImage(
-                                        image: NetworkImage(department.imageUrl),
+                                        image:department.imageUrl=="no"?const AssetImage("asset/images/default.png") :NetworkImage(department.imageUrl),
                                         fit: BoxFit.fill
                                     ),
                                     color: const Color(0xffE9F3FF),
@@ -592,7 +592,7 @@ class _BranchesDataState extends State<BranchesData> {
                                       MainAxisAlignment.center,
                                       children: [
                                         const Text(
-                                          "شعار الفرع",
+                                          "صورة الموظف",
                                           style: TextStyle(
                                               fontSize: 10,
                                               color: Colors.white,
@@ -670,9 +670,9 @@ class _BranchesDataState extends State<BranchesData> {
                                 autocorrect: false,
                                 autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
-                                controller: manager,
+                                controller: employee,
                                 decoration: InputDecoration(
-                                    hintText: "اسم مسؤول الفرع",
+                                    hintText: "اسم الموظف",
                                     hintStyle: const TextStyle(
                                         fontFamily: 'Cairo',
                                         color: Color(0xff9BA5BE),
@@ -769,12 +769,12 @@ class _BranchesDataState extends State<BranchesData> {
                               });
                             } else {
                               Provider.of<AppProvider>(context, listen: false)
-                                  .updateDepartment(
-                                  branch.text.trim(),
+                                  .updateEmployee(
+                                  counterName.text.trim(),
                                   email.text.trim(),
                                   phone.text.trim(),
                                   _selectedImage,
-                                  manager.text.trim(),
+                                  employee.text.trim(),
                                   password.text.trim(),department)
                                   .then((str) {
                                 if (str == "success") {

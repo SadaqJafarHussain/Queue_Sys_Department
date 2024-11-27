@@ -16,9 +16,9 @@ class NewBranchAccount extends StatefulWidget {
 class _NewBranchAccountState extends State<NewBranchAccount> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
-  TextEditingController branch = TextEditingController();
+  TextEditingController counterName = TextEditingController();
   TextEditingController phone = TextEditingController();
-  TextEditingController manager = TextEditingController();
+  TextEditingController employee = TextEditingController();
   File? _selectedImage;
   RegExp emailRegex= RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
   RegExp phoneRegex = RegExp(r'^07[0-9]{9}$');
@@ -204,9 +204,9 @@ class _NewBranchAccountState extends State<NewBranchAccount> {
                                   autocorrect: false,
                                   autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                  controller: branch,
+                                  controller: counterName,
                                   decoration: InputDecoration(
-                                      hintText: "اسم الفرع",
+                                      hintText: "اسم الشباك",
                                       hintStyle: const TextStyle(
                                           fontFamily: 'Cairo',
                                           color: Color(0xff9BA5BE),
@@ -296,7 +296,7 @@ class _NewBranchAccountState extends State<NewBranchAccount> {
                                             MainAxisAlignment.center,
                                         children: [
                                           const Text(
-                                            "شعار الفرع",
+                                            "صورة الموظف",
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.white,
@@ -368,9 +368,9 @@ class _NewBranchAccountState extends State<NewBranchAccount> {
                                   autocorrect: false,
                                   autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                  controller: manager,
+                                  controller: employee,
                                   decoration: InputDecoration(
-                                      hintText: "اسم مسؤول الفرع",
+                                      hintText: "اسم الموظف",
                                       hintStyle: const TextStyle(
                                           fontFamily: 'Cairo',
                                           color: Color(0xff9BA5BE),
@@ -444,8 +444,8 @@ class _NewBranchAccountState extends State<NewBranchAccount> {
                               if (email.text.isEmpty ||
                                   password.text.isEmpty ||
                                   phone.text.isEmpty ||
-                                  branch.text.isEmpty ||
-                                  manager.text.isEmpty ) {
+                                  counterName.text.isEmpty ||
+                                  employee.text.isEmpty ) {
                                 showMyDialog(
                                     context,
                                     "asset/images/no.png",
@@ -470,12 +470,12 @@ class _NewBranchAccountState extends State<NewBranchAccount> {
                                       Navigator.pop(context);
                                 });
                               } else {
-                                Provider.of<AppProvider>(context,listen: false).addDepartment(
-                                    branch.text.trim(),
+                                Provider.of<AppProvider>(context,listen: false).addEmployee(
+                                    counterName.text.trim(),
                                     email.text.trim(),
                                     phone.text.trim(),
                                     _selectedImage,
-                                    manager.text.trim(),
+                                    employee.text.trim(),
                                     password.text.trim()).then((str){
                                       if(str=="success"){
                                         showMyDialog(
@@ -484,11 +484,11 @@ class _NewBranchAccountState extends State<NewBranchAccount> {
                                             const Color(0xff00CEC9),
                                             "تم تسجيل حساب الفرع بنجاح",(){
                                               setState(() {
-                                                branch.clear();
+                                                counterName.clear();
                                                 email.clear();
                                                 phone.clear();
                                                 _selectedImage=null;
-                                                manager.clear();
+                                                employee.clear();
                                                 password.clear();
                                               });
                                               Navigator.pop(context);

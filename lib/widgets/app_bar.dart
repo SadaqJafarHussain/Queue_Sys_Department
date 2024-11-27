@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:queue_system/Controller/app_provider.dart';
 
 class CustomAppBar extends StatelessWidget {
   const CustomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    var provider=Provider.of<AppProvider>(context);
     return Container(
       height: MediaQuery.of(context).size.height * .10,
       width: MediaQuery.of(context).size.width * .835,
@@ -43,20 +46,20 @@ class CustomAppBar extends StatelessWidget {
             ),
             Row(
               children: [
-                const Column(
+                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Row(
                       children: [
-                        Icon(
+                       const Icon(
                           Icons.arrow_back_ios,
                           size: 12,
                           color: Colors.white,
                         ),
                         Text(
-                          "عمار حسن شناوه",
-                          style: TextStyle(
+                          provider.userModel!.name,
+                          style: const TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -65,8 +68,8 @@ class CustomAppBar extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      "مدير النظام",
-                      style: TextStyle(
+                      provider.userModel!.departmentName,
+                      style: const TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 11,
                           color: Color(0xff9BA5BE)),
